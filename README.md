@@ -51,8 +51,26 @@ rather than just clobbering them.
 Viewing:
 -------
 
-Use the google maps javascript code to view the image, or try out the layers thing. If 
-desired, check out the full image at a given zoom level to stitch the entire thing together.
+Use the google maps javascript code to view the image, or try out the openlayers.org thing
+(untested) or Leaflet. If desired, check out the full image at a given zoom level to stitch 
+the entire thing together.
+
+
+Examples:
+--------
+
+import colossus
+image = colossus.LargeImage.import('~/tmp/bigmap.png')
+image.checkin('~/tmp/bigmap_colossus', zoomlevel=0)
+subimage = colossus.LargeImage.checkout('~/tmp/bigmap_colossus', xmin=200, xmax=500, ymin=200, ymax=500)
+subimage.export('~/tmp/subimage.png')
+# Now spend time editing ~/tmp/subimage.png, e.g. in Gimp.
+
+# and now we push the edited image back onto the original:
+new_subimage = colossus.LargeImage.import('~/tmp/subimage.png')
+# When doing the checkin, it is important to get the alignment right. Otherwise it will just clobber
+# whatever part of the image starts at x=0, y=0:
+new_subimage.checkin('~/tmp/bigmap_colossus', zoomlevel=0, xmin=200, xmax=500, ymin=200, ymax=500)
 
 
 
