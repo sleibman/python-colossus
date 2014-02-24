@@ -37,7 +37,7 @@ class Storage(object):
         if ymax is None:
             ymax = self.height
         raise NotImplementedError()
-    
+
 
 
 
