@@ -73,4 +73,7 @@ new_subimage = colossus.LargeImage.import('~/tmp/subimage.png')
 new_subimage.checkin('~/tmp/bigmap_colossus', zoomlevel=0, xmin=200, xmax=500, ymin=200, ymax=500)
 
 
+TODO:
+----
+Instead of verbally stating a dependence on PIL, express a pip dependence on Pillow.
 
