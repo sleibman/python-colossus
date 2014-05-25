@@ -28,6 +28,27 @@ def sample_small_array():
     return img
 
 
+def element_array_to_abgr(array):
+    """
+    Converts a 4-element array of integers to an ABGR (alpha;blue;green;red) integer.
+    Example: array_to_rgba([255,0,255,16]) returns 0x10FF00FF
+    """
+    # r =reloaded_array.reshape(40,4)
+    # numpy.apply_along_axis(array_to_rgba,1,r)
+    return 0x00000000 | (array[3] << 6*4) | (array[2] << 4*4) | (array[1] << 2*4) | (array[0])
+
+
+def image_array_to_abgr(array):
+    """
+    Converts a 3D numpy array (a 2D array of 4-element ABGR arrays) to a 2D array of ints that
+    have AABBGGRR values.
+    """
+    (h, w, e) = array.shape
+    a = array.reshape(h*w, e)
+    a = numpy.apply_along_axis(element_array_to_abgr, 1, a)
+    return a.reshape(h, w)
+
+
 class TestPilBasics():
     def setup(self):
         (fd, filename) = tempfile.mkstemp(suffix='.png')
@@ -45,7 +66,7 @@ class TestPilBasics():
         image.save(self.tmp_png_filename)
         reloaded_image = Image.open(self.tmp_png_filename)
         reloaded_array = numpy.asarray(reloaded_image)
-        nose.tools.assert_true(numpy.alltrue(array == reloaded_array))
+        nose.tools.assert_true(numpy.alltrue(array == image_array_to_abgr(reloaded_array)))
 
 
 class TestImage():
