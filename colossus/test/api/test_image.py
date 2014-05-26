@@ -6,6 +6,7 @@ import numpy
 import tempfile
 import os
 from PIL import Image
+import shutil
 
 
 def create_image(img):
@@ -74,14 +75,36 @@ class TestImage():
         (fd, filename) = tempfile.mkstemp(suffix='.png')
         self.tmp_png_filename = filename
 
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        test_dir = os.path.dirname(script_dir)
+        self.stored_test_image = os.path.join(test_dir, 'images', 'jace.png')
+
+        self.temp_dir = tempfile.mkdtemp()
+
     def teardown(self):
         try:
             os.remove(self.tmp_png_filename)
+            shutil.rmtree(self.temp_dir)
         except OSError:
             pass
 
-
     def test_import_file(self):
-        create_image(self.tmp_png_filename)
-        colossus.LargeImage.import_file(self.tmp_png_filename)
-        x=1
+        array = sample_small_array()
+        image = create_image(array)
+        image.save(self.tmp_png_filename)
+        li = colossus.LargeImage.import_file(self.tmp_png_filename)
+        nose.tools.assert_true(isinstance(li, colossus.LargeImage))
+
+    def test_imported_size(self):
+        li = colossus.LargeImage.import_file(self.stored_test_image)
+        nose.tools.assert_equal(li.size, (1202, 762))
+
+    def test_default_patch_size(self):
+        li = colossus.LargeImage()
+        nose.tools.assert_equal(li.patch_size, (256, 256))
+
+    def test_checkin(self):
+        li = colossus.LargeImage.import_file(self.stored_test_image)
+        li.checkin(self.temp_dir, zoomlevel=0)
+
+        # image.checkin('~/tmp/bigmap_colossus', zoomlevel=0)

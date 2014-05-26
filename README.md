@@ -60,7 +60,7 @@ Examples:
 --------
 
     import colossus
-    image = colossus.LargeImage.import('~/tmp/bigmap.png')
+    image = colossus.LargeImage.import_file('~/tmp/bigmap.png')
     image.checkin('~/tmp/bigmap_colossus', zoomlevel=0)
     subimage = colossus.LargeImage.checkout('~/tmp/bigmap_colossus', xmin=200, xmax=500, ymin=200, ymax=500)
     subimage.export('~/tmp/subimage.png')
