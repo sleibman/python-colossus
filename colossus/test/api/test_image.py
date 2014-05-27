@@ -103,6 +103,24 @@ class TestImage():
         li = colossus.LargeImage()
         nose.tools.assert_equal(li.patch_size, (256, 256))
 
+    def test_xy_to_ij(self):
+        li = colossus.LargeImage()
+        nose.tools.assert_equal((0, 0), li.xy_to_ij(0, 0))
+        nose.tools.assert_equal((0, 1), li.xy_to_ij(255, 256))
+        nose.tools.assert_equal((2, 1), li.xy_to_ij(512, 511))
+
+    def test_ij_to_xy_min(self):
+        li = colossus.LargeImage()
+        nose.tools.assert_equal((0, 0), li.ij_to_xy_min(0, 0))
+        nose.tools.assert_equal((256, 0), li.ij_to_xy_min(1, 0))
+        nose.tools.assert_equal((512, 512), li.ij_to_xy_min(2, 2))
+
+    def test_ij_to_xy_max(self):
+        li = colossus.LargeImage()
+        nose.tools.assert_equal((255, 255), li.ij_to_xy_max(0, 0))
+        nose.tools.assert_equal((511, 255), li.ij_to_xy_max(1, 0))
+        nose.tools.assert_equal((767, 767), li.ij_to_xy_max(2, 2))
+
     def test_checkin(self):
         li = colossus.LargeImage.import_file(self.stored_test_image)
         li.checkin(self.temp_dir, zoomlevel=0)

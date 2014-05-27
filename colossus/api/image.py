@@ -1,6 +1,7 @@
 __author__ = 'sleibman'
 
 from PIL import Image
+import os
 
 
 class LargeImage(object):
@@ -36,7 +37,25 @@ class LargeImage(object):
         """
         return 256, 256
 
-    def checkin(self, dir, zoomlevel, x, y):
+    def xy_to_ij(self, x, y):
+        """
+        Finds the i,j patch containing specified absolute x,y coordinates in the full image.
+        """
+        return x / self.patch_size[0], y / self.patch_size[1]
+
+    def ij_to_xy_min(self, i, j):
+        """
+        Returns the absolute coordinates of the min corner of the specified patch.
+        """
+        return i * self.patch_size[0], j * self.patch_size[1]
+
+    def ij_to_xy_max(self, i, j):
+        """
+        Returns the absolute coordinates of the max corner of the specified patch.
+        """
+        return (i+1) * self.patch_size[0] - 1, (j+1) * self.patch_size[1] - 1
+
+    def checkin(self, topdir, zoomlevel, x, y):
         """
         Creates patches, saves them in directory tree under dir.
         @param x: x offset for the checked-in subset in the full image. For a new checkin, set x=0
@@ -47,8 +66,30 @@ class LargeImage(object):
         """
 
         # Create directory if necessary.
+        if not os.path.exists(topdir):
+            os.makedirs(topdir)
+
+        max_x = x + self.size[0]
+        max_y = y + self.size[1]
+
+
+        (start_i, start_j) = self.xy_to_ij(x, y)
+        (end_i, end_j) = self.xy_to_ij(max_x, max_y)
 
         # Determine set of patches that are only partially covered.
+        patch_start_x, patch_start_y = self.ij_to_xy_min(start_i, start_j)
+        patch_end_x, patch_end_y = self.ij_to_xy_max(end_i, end_j)
+
+        function_array = [[self.ensure_exists if i<start_i or j<start_j else
+                           self.partial_clobber if (i==start_i and patch_start_x != x) or
+                                              (j==start_j and patch_start_y != y) or
+                                              (i==end_i and patch_end_x != max_x) or
+                                              (j==end_j and patch_end_y != max_y) else
+                           self.full_clobber for j in range(end_j+1)] for i in range(end_i+1)]
+
+        for i in range(end_i+1):
+            for j in range(end_j+1):
+                function_array[i][j](i, j)
 
         # For all partial cover patches:
         #   if patch exists on disk, import it, clobber the overlap
